@@ -1,7 +1,9 @@
 
 # About the project
 
-*I am still struggling using Git and experiencing issues using my work computer.  https://github.com/IrisOrizar/IODS-project.*
+<<<<<<< HEAD
+*I am still struggling using Git and experiencing issues using my work computer.  I have issues with 'knit', specially with xfun and tinytex.  Update: Its seems everything is in order now.   [Github](https://github.com/IrisOrizar/IODS-project)*
+>>>>>>> 054f3b4289d62f8e5cfd686e30c776023601134e
 
 ```{r}
 # This is a so-called "R chunk" where you can write R code.
@@ -9,5 +11,5 @@
 date()
 
 ```
-The text continues here.
+I am still struggling using Git and experiencing issues using my work computer.  I have issues with 'knit', specially with xfun and tinytex.  Update: It seems everything is in order now.   [Github](https://github.com/IrisOrizar/IODS-project)
 
