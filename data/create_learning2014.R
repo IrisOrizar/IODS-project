@@ -86,4 +86,46 @@ dim(data)
 str(data)
 head(data)
 
-#-- END
+#-- END of Data Wrangling
+#-- continue for Regression analysis
+####################################################################
+#####         Visualization and regression Analysis
+#####---------------------------------------------------------------
+
+# inspect the data
+data<-read.csv('learning2014.csv', header = TRUE)
+
+dim(data)
+str(data)
+head(data)
+
+#load/intall required packages
+#install.packages('ggplot2')
+library(dplyr)
+library(ggplot2)
+
+#initialize plot
+p1 <- ggplot(data, aes(x = attitude, y = points, 
+                       col = gender))
+
+#-- choose type of visualization (e.g. geom_point)
+p2 <- p1 + geom_point()
+p2
+
+#-- add regression line
+p3 <- p2 + geom_smooth(method = 'lm')
+
+#-- adding Main Title for the plot
+p4<- p3 + ggtitle("Student's attitude vs exam points")
+p4
+
+##-- Performing simple linear regression
+
+# a scatter plot of points versus attitude
+qplot(attitude, points, data = learning2014) + geom_smooth(method = "lm")
+
+# fit a linear model
+my_model <- lm(points ~ attitude, data = learning2014)
+
+# print out a summary of the model
+summary(my_model)

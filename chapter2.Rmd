@@ -17,6 +17,7 @@ date()
 
 #install.packages(c('dplyr', 'ggplot2'))
 library(dplyr)
+library(GGally)
 library(ggplot2)
 
 # Read the data
@@ -25,6 +26,48 @@ data <- read.table("http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt"
 # Inspect the dimension and structure of the data
 dim(data)
 str(data)
+
+
+```
+
+We can also add new columns with the following names: '
+
+
+
+
+```{r}
+
+#-- create 'attitude' column
+data$attitude<-data$Attitude/10
+
+#-- create 'deep' column
+deep_q<-c("D03", "D11", "D19", "D27", "D07", "D14", 
+          "D22", "D30","D06",  "D15", "D23", "D31")
+deep_c<-select(data, one_of(deep_q))
+data$deep<-rowMeans(deep_c)
+
+#-- create 'stra' column
+strategic_q <- c("ST01","ST09","ST17","ST25","ST04","ST12",
+                         "ST20","ST28")
+
+strategic_c<-select(data, one_of(strategic_q))
+data$stra<-rowMeans(strategic_c)
+
+#create 'surf' column
+surface_q <- c("SU02","SU10","SU18","SU26", "SU05","SU13",
+                       "SU21","SU29","SU08","SU16","SU24","SU32")
+surface_c<-select(data, one_of(surface_q))
+data$surf<-rowMeans(surface_c)
+
+#-- columns to keep
+keep_columns <- c("gender","Age","attitude", "deep", 
+                  "stra", "surf", "Points")
+
+#-- create a new dataset
+l2014<-select(data, one_of(keep_columns))
+
+#-- check structure
+str(l2014)
 
 
 ```

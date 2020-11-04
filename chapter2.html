@@ -424,7 +424,7 @@ summary {
 <p>First step is to laod the data to the console. The data set that will be using for can be accessed using this link [<a href="http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt" class="uri">http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt</a>] (<a href="http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt" class="uri">http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt</a>). Information about the data set can be acessed through this link: [<a href="https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt" class="uri">https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt</a>] (<a href="https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt" class="uri">https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt</a>).</p>
 <p>After loading the data we can check the dimension and structure of the data using ‘dim()’ and ‘str()’, respectively.</p>
 <pre class="r"><code>date()</code></pre>
-<pre><code>## [1] &quot;Wed Nov 04 13:18:19 2020&quot;</code></pre>
+<pre><code>## [1] &quot;Wed Nov 04 13:51:27 2020&quot;</code></pre>
 <pre class="r"><code># installing packages
 
 #install.packages(c(&#39;dplyr&#39;, &#39;ggplot2&#39;))
@@ -437,6 +437,11 @@ library(dplyr)</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(GGally)</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;GGally&#39;:
+##   method from   
+##   +.gg   ggplot2</code></pre>
 <pre class="r"><code>library(ggplot2)
 
 # Read the data
@@ -507,6 +512,46 @@ dim(data)</code></pre>
 ##  $ Attitude: int  37 31 25 35 37 38 35 29 38 21 ...
 ##  $ Points  : int  25 12 24 10 22 21 21 31 24 26 ...
 ##  $ gender  : chr  &quot;F&quot; &quot;M&quot; &quot;F&quot; &quot;M&quot; ...</code></pre>
+<p>We can also add new columns with the following names: ’</p>
+<pre class="r"><code>#-- create &#39;attitude&#39; column
+data$attitude&lt;-data$Attitude/10
+
+#-- create &#39;deep&#39; column
+deep_q&lt;-c(&quot;D03&quot;, &quot;D11&quot;, &quot;D19&quot;, &quot;D27&quot;, &quot;D07&quot;, &quot;D14&quot;, 
+          &quot;D22&quot;, &quot;D30&quot;,&quot;D06&quot;,  &quot;D15&quot;, &quot;D23&quot;, &quot;D31&quot;)
+deep_c&lt;-select(data, one_of(deep_q))
+data$deep&lt;-rowMeans(deep_c)
+
+#-- create &#39;stra&#39; column
+strategic_q &lt;- c(&quot;ST01&quot;,&quot;ST09&quot;,&quot;ST17&quot;,&quot;ST25&quot;,&quot;ST04&quot;,&quot;ST12&quot;,
+                         &quot;ST20&quot;,&quot;ST28&quot;)
+
+strategic_c&lt;-select(data, one_of(strategic_q))
+data$stra&lt;-rowMeans(strategic_c)
+
+#create &#39;surf&#39; column
+surface_q &lt;- c(&quot;SU02&quot;,&quot;SU10&quot;,&quot;SU18&quot;,&quot;SU26&quot;, &quot;SU05&quot;,&quot;SU13&quot;,
+                       &quot;SU21&quot;,&quot;SU29&quot;,&quot;SU08&quot;,&quot;SU16&quot;,&quot;SU24&quot;,&quot;SU32&quot;)
+surface_c&lt;-select(data, one_of(surface_q))
+data$surf&lt;-rowMeans(surface_c)
+
+#-- columns to keep
+keep_columns &lt;- c(&quot;gender&quot;,&quot;Age&quot;,&quot;attitude&quot;, &quot;deep&quot;, 
+                  &quot;stra&quot;, &quot;surf&quot;, &quot;Points&quot;)
+
+#-- create a new dataset
+l2014&lt;-select(data, one_of(keep_columns))
+
+#-- check structure
+str(l2014)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    183 obs. of  7 variables:
+##  $ gender  : chr  &quot;F&quot; &quot;M&quot; &quot;F&quot; &quot;M&quot; ...
+##  $ Age     : int  53 55 49 53 49 38 50 37 37 42 ...
+##  $ attitude: num  3.7 3.1 2.5 3.5 3.7 3.8 3.5 2.9 3.8 2.1 ...
+##  $ deep    : num  3.58 2.92 3.5 3.5 3.67 ...
+##  $ stra    : num  3.38 2.75 3.62 3.12 3.62 ...
+##  $ surf    : num  2.58 3.17 2.25 2.25 2.83 ...
+##  $ Points  : int  25 12 24 10 22 21 21 31 24 26 ...</code></pre>
 </div>
 </div>
 
