@@ -136,7 +136,7 @@ ggpairs(l2014, lower = list(combo = wrap("facethist",
                                                 bins = 20)))
 
 # create a regression model with multiple explanatory variables
-m2 <- lm(points ~ attitude + stra + surf, data = l2014)
+m2 <- lm(points ~ attitude + age + surf, data = l2014)
 
 # print out a summary of the model
 summary(m2)

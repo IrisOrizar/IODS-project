@@ -440,6 +440,7 @@ summary {
 <li><a href="#regression-analysis-and-model-validation">Regression Analysis and Model Validation</a><ul>
 <li><a href="#a.-data-wrangling">A. Data wrangling</a></li>
 <li><a href="#b.-multiple-linear-regression">B. Multiple Linear Regression</a></li>
+<li><a href="#b.2-model-validation">b.2 Model validation</a></li>
 </ul></li>
 </ul>
 </div>
@@ -454,7 +455,7 @@ summary {
 <pre class="r"><code># This is a so-called &quot;R chunk&quot; where you can write R code.
 
 date()</code></pre>
-<pre><code>## [1] &quot;Thu Nov 05 17:11:08 2020&quot;</code></pre>
+<pre><code>## [1] &quot;Thu Nov 05 22:03:14 2020&quot;</code></pre>
 <hr />
 </div>
 <div id="regression-analysis-and-model-validation" class="section level1">
@@ -467,7 +468,7 @@ date()</code></pre>
 <p>First step is to laod the data to the console. The data set that will be using for can be accessed using this link ‘<a href="http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt" class="uri">http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt</a>’. Information about the data set can be acessed through this link: ‘<a href="https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt" class="uri">https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt</a>’.</p>
 <p>After loading the data we can check the dimension and structure of the data using <strong>dim()</strong> and <strong>str()</strong>, respectively.</p>
 <pre class="r"><code>date()</code></pre>
-<pre><code>## [1] &quot;Thu Nov 05 17:11:08 2020&quot;</code></pre>
+<pre><code>## [1] &quot;Thu Nov 05 22:03:14 2020&quot;</code></pre>
 <pre class="r"><code># installing packages
 
 #install.packages(c(&#39;dplyr&#39;, &#39;ggplot2&#39;))
@@ -637,10 +638,73 @@ ggpairs(l2014, lower = list(combo = wrap(&quot;facethist&quot;, bins = 20)))
 # points &lt;- dependent variable
 # attitude + stra + surf &lt;- explanatory variables
 
-m2 &lt;- lm(points ~ attitude + stra + surf, data = l2014)
+m1 &lt;- lm(points ~ attitude + stra + surf, data = l2014)
 
 #-- print out summary
-summary(m2)</code></pre>
+summary(m1)
+
+#Call:
+#lm(formula = points ~ attitude + stra + surf, data = learning2014)
+#
+#Residuals:
+#     Min       1Q   Median       3Q      Max 
+#-17.1550  -3.4346   0.5156   3.6401  10.8952 
+#
+#Coefficients:
+#            Estimate Std. Error t value Pr(&gt;|t|)    
+#(Intercept)  11.0171     3.6837   2.991  0.00322 ** 
+#attitude      3.3952     0.5741   5.913 1.93e-08 ***
+#stra          0.8531     0.5416   1.575  0.11716    
+#surf         -0.5861     0.8014  -0.731  0.46563    
+#---
+#Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+#
+#Residual standard error: 5.296 on 162 degrees of freedom
+#Multiple R-squared:  0.2074,   Adjusted R-squared:  0.1927 
+#F-statistic: 14.13 on 3 and 162 DF,  p-value: 3.156e-08</code></pre>
+<p>Summary of the results from the first model (<strong>m1</strong>) shows that student’s <strong>attitude</strong> have significant statistical effect to their total exam points.</p>
+<p>We can make another model, this time only including <strong>attitude</strong> as the explanatory variable of exam points.</p>
+<pre class="r"><code>#-- model 2 with only 1 explanatory variabe
+m2&lt;-lm(points~attitude, data = l2014)
+
+#-- printing summary
+print(summary(m2))
+
+#Call:
+#lm(formula = points ~ attitude, data = l2014)
+#
+#Residuals:
+#     Min       1Q   Median       3Q      Max 
+#-16.9763  -3.2119   0.4339   4.1534  10.6645 
+#
+#Coefficients:
+#            Estimate Std. Error t value Pr(&gt;|t|)    
+#(Intercept)  11.6372     1.8303   6.358 1.95e-09 ***
+#attitude      3.5255     0.5674   6.214 4.12e-09 ***
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#Residual standard error: 5.32 on 164 degrees of freedom
+#Multiple R-squared:  0.1906,   Adjusted R-squared:  0.1856 
+#F-statistic: 38.61 on 1 and 164 DF,  p-value: 4.119e-09</code></pre>
+<p>Model 2 predicts that if <strong>attitude</strong> increased by 1 unit, the exam <strong>points</strong> will increased by as much as <strong>3.5 units</strong>.</p>
+<p>However, model needs to be evaluated and check if it violates assumptions for linear regression.</p>
+</div>
+<div id="b.2-model-validation" class="section level2">
+<h2>b.2 Model validation</h2>
+<p>Linear regression has several assumptions:<br />
++ errors are normally distributed<br />
++ errors are not correlated<br />
++ errors have constant variance<br />
++ the size of a given error does not depend on the explanatory variable</p>
+<p>This assumptions can be visually inspected using <strong>plot()</strong> command.</p>
+<pre class="r"><code># create a regression model with multiple explanatory variables
+l2014&lt;-as.data.frame(l2014)
+m3=lm(points ~ attitude + stra, data = l2014)
+# draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
+par(mfrow = c(2,2))
+plot(m3, which = c(1, 2, 5))</code></pre>
+<p>The <strong>Residuals vs Fitted</strong> plot shows no apparent pattern in the residuals suggesting constant variance of the errors. The <strong>Normal Q-Q plot</strong> suggests that the residual is normally distributed. The <strong>Residual vs Leverage plot</strong> suggests no outlier affecting the results.</p>
 <hr />
 <p>(more chapters to be added similarly as we proceed with the course!)</p>
 </div>

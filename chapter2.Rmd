@@ -125,10 +125,88 @@ ggpairs(l2014, lower = list(combo = wrap("facethist", bins = 20)))
 # points <- dependent variable
 # attitude + stra + surf <- explanatory variables
 
-m2 <- lm(points ~ attitude + stra + surf, data = l2014)
+m1 <- lm(points ~ attitude + stra + surf, data = l2014)
 
 #-- print out summary
-summary(m2)
+summary(m1)
+
+#Call:
+#lm(formula = points ~ attitude + stra + surf, data = learning2014)
+#
+#Residuals:
+#     Min       1Q   Median       3Q      Max 
+#-17.1550  -3.4346   0.5156   3.6401  10.8952 
+#
+#Coefficients:
+#            Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  11.0171     3.6837   2.991  0.00322 ** 
+#attitude      3.3952     0.5741   5.913 1.93e-08 ***
+#stra          0.8531     0.5416   1.575  0.11716    
+#surf         -0.5861     0.8014  -0.731  0.46563    
+#---
+#Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#
+#Residual standard error: 5.296 on 162 degrees of freedom
+#Multiple R-squared:  0.2074,	Adjusted R-squared:  0.1927 
+#F-statistic: 14.13 on 3 and 162 DF,  p-value: 3.156e-08
 
 ```
+
+Summary of the results from the first model (**m1**) shows that student's **attitude** have significant statistical effect to their total exam points.
+
+We can make another model, this time only including **attitude** as the explanatory variable of exam points.
+
+```{r eval = FALSE}
+#-- model 2 with only 1 explanatory variabe
+m2<-lm(points~attitude, data = l2014)
+
+#-- printing summary
+print(summary(m2))
+
+#Call:
+#lm(formula = points ~ attitude, data = l2014)
+#
+#Residuals:
+#     Min       1Q   Median       3Q      Max 
+#-16.9763  -3.2119   0.4339   4.1534  10.6645 
+#
+#Coefficients:
+#            Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  11.6372     1.8303   6.358 1.95e-09 ***
+#attitude      3.5255     0.5674   6.214 4.12e-09 ***
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#Residual standard error: 5.32 on 164 degrees of freedom
+#Multiple R-squared:  0.1906,	Adjusted R-squared:  0.1856 
+#F-statistic: 38.61 on 1 and 164 DF,  p-value: 4.119e-09
+
+
+```
+
+Model 2 predicts that if **attitude** increased by 1 unit, the exam **points** will increased by as much as **3.5 units**.
+
+However, model needs to be evaluated and check if it violates assumptions for linear regression.
+
+## b.2 Model validation
+
+Linear regression has several assumptions:  
+     + errors are normally distributed  
+     + errors are not correlated  
+     + errors have constant variance  
+     + the size of a given error does not depend on the explanatory variable
+     
+This assumptions can be visually inspected using **plot()** command.
+
+```{r eval = FALSE}
+
+# create a regression model with multiple explanatory variables
+l2014<-as.data.frame(l2014)
+m3=lm(points ~ attitude + stra, data = l2014)
+# draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
+par(mfrow = c(2,2))
+plot(m3, which = c(1, 2, 5))
+```
+
+The **Residuals vs Fitted** plot shows no apparent pattern in the residuals suggesting constant variance of the errors. The **Normal Q-Q plot** suggests that the residual is normally distributed. The **Residual vs Leverage plot** suggests no outlier affecting the results. 
 
