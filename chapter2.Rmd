@@ -1,13 +1,13 @@
 # Regression Analysis and Model Validation
 
-## Data wrangling
+## A. Data wrangling
 Data wrangling is an important step in data analysis. This includes gathering, inspecting, transforming and mapping the data into a appropriate format for a variety of data analyses.
 
-## Demo data sets
+### a.1 Demo data sets
 
-First step is to laod the data to the console. The data set that will be using for can be accessed using this link [http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt] (http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt). Information about the data set can be acessed through this link: [https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt] (https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt).
+First step is to laod the data to the console. The data set that will be using for can be accessed using this link 'http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt'. Information about the data set can be acessed through this link: 'https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt'.
 
-After loading the data we can check the dimension and structure of the data using 'dim()' and 'str()', respectively.
+After loading the data we can check the dimension and structure of the data using **dim()** and **str()**, respectively.
 
 ```{r}
 
@@ -30,9 +30,11 @@ str(data)
 
 ```
 
-We can also add new columns with the following names: '
+### a.2 Adding new columns
 
+It is also possible to add new columns in the data set. In this exercise, we are going to create new column **attitude**, by scaling the column **data$attitude** by 10.
 
+we are also adding new column (**attitude**, **deep**, **stra**, **surf**) corresponding to the mean value for questions related to deep, strategic and surface learning.
 
 
 ```{r}
@@ -40,24 +42,34 @@ We can also add new columns with the following names: '
 #-- create 'attitude' column
 data$attitude<-data$Attitude/10
 
-#-- create 'deep' column
+#-- create 'deep' column for questions related to deep learning
 deep_q<-c("D03", "D11", "D19", "D27", "D07", "D14", 
           "D22", "D30","D06",  "D15", "D23", "D31")
 deep_c<-select(data, one_of(deep_q))
 data$deep<-rowMeans(deep_c)
 
-#-- create 'stra' column
+#-- create 'stra' column for questions related to strategic learning
 strategic_q <- c("ST01","ST09","ST17","ST25","ST04","ST12",
                          "ST20","ST28")
 
 strategic_c<-select(data, one_of(strategic_q))
 data$stra<-rowMeans(strategic_c)
 
-#create 'surf' column
+#create 'surf' column for questions related to surface learning
 surface_q <- c("SU02","SU10","SU18","SU26", "SU05","SU13",
                        "SU21","SU29","SU08","SU16","SU24","SU32")
 surface_c<-select(data, one_of(surface_q))
 data$surf<-rowMeans(surface_c)
+
+```
+
+
+### a.2 Subsetting data set
+
+We can create a subset from the original data using **dplyr** package. We are going to creat a data set that only contains a subset of the originial data set and we are calling it **l2014**.
+
+```{r}
+library(dplyr)
 
 #-- columns to keep
 keep_columns <- c("gender","Age","attitude", "deep", 
@@ -69,7 +81,54 @@ l2014<-select(data, one_of(keep_columns))
 #-- check structure
 str(l2014)
 
+```
+
+### a.3 Data visualization
+
+We are using **GGally** and **ggplot2** packages in creating a graphical overview of the data set we just created.
+
+```{r}
+
+library(GGally)
+library(ggplot2)
+
+#creating plot matrix using ggpairs
+
+p <- ggpairs(l2014, mapping = aes(col = gender, alpha = 0.3),
+             lower = list(combo = wrap("facethist", bins = 20)))
+
+p
 
 ```
 
+The graphical output is a scatter plot matrix among the parameters with colors corresponding to **gender**. There is gender biased in the data set, however the distribution is generally normal for both gender in all student's attitude towards statistics and approaches to learning. In addition, age distribution is skewed towards younger participants between ages 20 - 30.
+
+In general, there is low linear correlation among the parameters, with the highest correlation found between attitude and exam points (r^{2} = 0.44, F-stat = 0.042).
+
+
+## B. Multiple Linear Regression
+
+Linear regression is a statistical approach that demonstrates relationships between a dependent variable **y** and one or more explanatory variables **X**.
+
+In this exercise, we are selecting three explanatory variables (attitude, stra, surf) from l2014 data set we created from the previous section to explain the exam points of the students.
+
+```{r eval = FALSE}
+
+#-- visualize the relationships
+library(GGally)
+library(ggplot2)
+
+ggpairs(l2014, lower = list(combo = wrap("facethist", bins = 20)))
+
+#-- create a regression model with multiple explanatory variables
+# lm <- the type of model we are using (linear model)
+# points <- dependent variable
+# attitude + stra + surf <- explanatory variables
+
+m2 <- lm(points ~ attitude + stra + surf, data = l2014)
+
+#-- print out summary
+summary(m2)
+
+```
 

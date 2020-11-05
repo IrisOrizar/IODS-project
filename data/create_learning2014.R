@@ -122,10 +122,22 @@ p4
 ##-- Performing simple linear regression
 
 # a scatter plot of points versus attitude
-qplot(attitude, points, data = learning2014) + geom_smooth(method = "lm")
+qplot(attitude, points, data = l2014) + geom_smooth(method = "lm")
 
 # fit a linear model
-my_model <- lm(points ~ attitude, data = learning2014)
+my_model <- lm(points ~ attitude, data = l2014)
 
 # print out a summary of the model
 summary(my_model)
+
+##-- Perform multiple linear regression
+# create an plot matrix with ggpairs()
+ggpairs(l2014, lower = list(combo = wrap("facethist", 
+                                                bins = 20)))
+
+# create a regression model with multiple explanatory variables
+m2 <- lm(points ~ attitude + stra + surf, data = l2014)
+
+# print out a summary of the model
+summary(m2)
+
