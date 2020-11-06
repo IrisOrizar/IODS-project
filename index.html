@@ -455,7 +455,7 @@ summary {
 <pre class="r"><code># This is a so-called &quot;R chunk&quot; where you can write R code.
 
 date()</code></pre>
-<pre><code>## [1] &quot;Fri Nov 06 15:26:19 2020&quot;</code></pre>
+<pre><code>## [1] &quot;Fri Nov 06 15:32:48 2020&quot;</code></pre>
 <hr />
 </div>
 <div id="regression-analysis-and-model-validation" class="section level1">
@@ -468,7 +468,7 @@ date()</code></pre>
 <p>First step is to laod the data to the console. The data set that will be using for can be accessed using this link ‘<a href="http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt" class="uri">http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt</a>’. Information about the data set can be acessed through this link: ‘<a href="https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt" class="uri">https://www.mv.helsinki.fi/home/kvehkala/JYTmooc/JYTOPKYS3-meta.txt</a>’.</p>
 <p>After loading the data we can check the dimension and structure of the data using <strong>dim()</strong> and <strong>str()</strong>, respectively.</p>
 <pre class="r"><code>date()</code></pre>
-<pre><code>## [1] &quot;Fri Nov 06 15:26:20 2020&quot;</code></pre>
+<pre><code>## [1] &quot;Fri Nov 06 15:32:48 2020&quot;</code></pre>
 <pre class="r"><code># installing packages
 
 #install.packages(c(&#39;dplyr&#39;, &#39;ggplot2&#39;))
@@ -637,14 +637,14 @@ ggpairs(l2014, lower = list(combo = wrap(&quot;facethist&quot;, bins = 20)))</co
 # lm &lt;- the type of model we are using (linear model)
 # points &lt;- dependent variable
 # attitude + stra + surf &lt;- explanatory variables
-colnames(l2014)[7] &lt;- &#39;points&#39;
-m1 &lt;- lm(points~attitude + stra + surf, data = l2014)
+
+m1 &lt;- lm(Points~attitude + stra + surf, data = l2014)
 
 #-- print out summary
 summary(m1)</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = points ~ attitude + stra + surf, data = l2014)
+## lm(formula = Points ~ attitude + stra + surf, data = l2014)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
@@ -665,13 +665,13 @@ summary(m1)</code></pre>
 <p>Summary of the results from the first model (<strong>m1</strong>) shows that student’s <strong>attitude</strong> have significant statistical effect to their total exam points.</p>
 <p>We can make another model, this time only including <strong>attitude</strong> as the explanatory variable of exam points.</p>
 <pre class="r"><code>#-- model 2 with only 1 explanatory variabe
-m2&lt;-lm(points~attitude, data = l2014)
+m2&lt;-lm(Points~attitude, data = l2014)
 
 #-- printing summary
 summary(m2)</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = points ~ attitude, data = l2014)
+## lm(formula = Points ~ attitude, data = l2014)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
@@ -700,7 +700,7 @@ summary(m2)</code></pre>
 <p>This assumptions can be visually inspected using <strong>plot()</strong> command.</p>
 <pre class="r"><code># create a regression model with multiple explanatory variables
 l2014&lt;-as.data.frame(l2014)
-m3=lm(points ~ attitude + stra, data = l2014)
+m3=lm(Points ~ attitude + stra, data = l2014)
 # draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
 par(mfrow = c(2,2))
 plot(m3, which = c(1, 2, 5))</code></pre>

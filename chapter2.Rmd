@@ -124,8 +124,8 @@ ggpairs(l2014, lower = list(combo = wrap("facethist", bins = 20)))
 # lm <- the type of model we are using (linear model)
 # points <- dependent variable
 # attitude + stra + surf <- explanatory variables
-colnames(l2014)[7] <- 'points'
-m1 <- lm(points~attitude + stra + surf, data = l2014)
+
+m1 <- lm(Points~attitude + stra + surf, data = l2014)
 
 #-- print out summary
 summary(m1)
@@ -138,7 +138,7 @@ We can make another model, this time only including **attitude** as the explanat
 
 ```{r eval = TRUE}
 #-- model 2 with only 1 explanatory variabe
-m2<-lm(points~attitude, data = l2014)
+m2<-lm(Points~attitude, data = l2014)
 
 #-- printing summary
 summary(m2)
@@ -163,7 +163,7 @@ This assumptions can be visually inspected using **plot()** command.
 
 # create a regression model with multiple explanatory variables
 l2014<-as.data.frame(l2014)
-m3=lm(points ~ attitude + stra, data = l2014)
+m3=lm(Points ~ attitude + stra, data = l2014)
 # draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
 par(mfrow = c(2,2))
 plot(m3, which = c(1, 2, 5))
