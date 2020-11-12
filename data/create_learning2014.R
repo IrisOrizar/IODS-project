@@ -78,6 +78,7 @@ head(l2014[-1,])
 # ?write.csv
 write.csv(l2014, file = 'learning2014.csv', row.names = FALSE)
 
+
 #-- check the data
 
 data<-read.csv('learning2014.csv', header = TRUE)
@@ -103,7 +104,7 @@ head(data)
 #install.packages('ggplot2')
 library(dplyr)
 library(ggplot2)
-
+library(GGally)
 #initialize plot
 p1 <- ggplot(data, aes(x = attitude, y = points, 
                        col = gender))

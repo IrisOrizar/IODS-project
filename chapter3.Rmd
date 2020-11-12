@@ -1,0 +1,162 @@
+# Logistic Regression
+
+## Data exploration
+
+In this data analysis we are going to use 
+
+```{r}
+library(dplyr)
+
+url <- "http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt"
+ 
+# read the data
+
+data<-read.table(url, sep = ",", header = TRUE)
+
+str(data)
+dim(data)
+glimpse(data)
+
+```
+
+## Graphical exploration
+
+Lets explore alcohol consumption relationship with some explanatory variables.
+
+First, **failures** = number of past class failures.
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+g1 <- ggplot(data, aes(x = high_use, y = failures, col = sex))
+
+# define the plot as a boxplot and draw it
+g1 + geom_boxplot() + ylab("failures")
+```
+
+
+```{r}
+data %>% group_by(failures, sex, high_use) %>% summarise(count = n())
+```
+
+Next, **absences** = number of school absences
+
+```{r}
+g2 <- ggplot(data, aes(x = high_use, y = absences, col = sex))
+
+# define the plot as a boxplot and draw it
+g2 + geom_boxplot() + ylab("absences")
+```
+
+
+```{r}
+data %>% group_by(absences, sex, high_use) %>% summarise(count = n())
+```
+
+
+Finally, **freetime** = free time after school.
+
+
+
+```{r}
+g3 <- ggplot(data, aes(x = high_use, y = freetime, col = sex))
+
+# define the plot as a boxplot and draw it
+g3 + geom_boxplot() + ylab("freetime")
+```
+
+
+```{r}
+data %>% group_by(freetime, sex, high_use) %>% summarise(count = n())
+```
+
+
+## Fitting a model
+
+```{r}
+## fitting model using glm()
+m1 <- glm(high_use ~ failures*sex + absences*sex + freetime*sex, 
+          data = data, family = "binomial")
+
+# print out a summary of the model
+summary(m1)
+drop1(m1)
+
+# print out the coefficients of the model
+m2<- glm(high_use ~ failures + absences*sex + freetime*sex, 
+         data = data, family = "binomial")
+summary(m2)
+drop1(m2)
+```
+
+
+```{r}
+# compute odds ratios (OR)
+OR <- coef(m2) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(m2) %>% exp
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+```
+
+
+
+
+```{r}
+# print out the coefficients of the model
+m2<- glm(high_use ~ failures + absences*sex + freetime*sex, 
+         data = data, family = "binomial")
+
+# predict() the probability of high_use
+probabilities <- predict(m2, type = "response")
+
+# add the predicted probabilities to 'alc'
+data <- mutate(data, probability = probabilities)
+
+# use the probabilities to make a prediction of high_use
+data <- mutate(data, prediction = probabilities > 0.5)
+
+# see the last ten original classes, predicted probabilities, and class predictions
+select(data, failures, absences, sex, high_use, probability, prediction) %>% tail(10)
+
+# tabulate the target variable versus the predictions
+table(high_use = data$high_use, prediction = data$prediction)
+
+```
+
+
+
+```{r}
+# initialize a plot of 'high_use' versus 'probability' in 'alc'
+g <- ggplot(data, aes(x = probability, y = high_use, col = prediction))
+
+# define the geom as points and draw the plot
+g + geom_point()
+
+# tabulate the target variable versus the predictions
+table(high_use = data$high_use, prediction = data$prediction) %>% prop.table() %>% addmargins()
+```
+
+
+```{r}
+# define a loss function (mean prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# call loss_func to compute the average number of wrong predictions in the (training) data
+loss_func(class = data$high_use, prob = data$probability)
+
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = data, cost = loss_func, glmfit = m2, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+
+```
+
