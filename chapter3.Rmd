@@ -2,7 +2,10 @@
 
 ## Data exploration
 
-In this data analysis we are going to use 
+In this data analysis we are going to use a data set from [UCI Machine Learning Repository] (https://archive.ics.uci.edu/ml/datasets/Student+Performance#). This data set was originally aimed to predict student performance on Math and Portuguese Language subjects in secondary education (high school). This also includes information about alcohol consumption.
+
+For this exercise, we are going to explore relationship between alcohol consumption and other parameters available. There are two separate data sets from this website, but we are going to use the combined data set. This joined data set can be access throuhg this link: http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt 
+
 
 ```{r}
 library(dplyr)
@@ -12,18 +15,27 @@ url <- "http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datas
 # read the data
 
 data<-read.table(url, sep = ",", header = TRUE)
+```
 
+
+```{r eval = FALSE}
 str(data)
 dim(data)
 glimpse(data)
-
+colnames(data)
 ```
+
+The data set contains 382 observations and 35 covariates. Two new columns were added to the original data set (**$alc_use** and **$high_use**). **alc_use** is the average alcohol consumption during workday (**$Dalc**) and weekend (**$Walc**). **high_use** is a logical column which contains boolean data type (TRUE or FALSE).
 
 ## Graphical exploration
 
-Lets explore alcohol consumption relationship with some explanatory variables.
+On this exercise, we are going to explore relationship of alcohol consumption (**high_use**) to **failures**, **absences**, **freetime**. **sex**.
 
-First, **failures** = number of past class failures.
+**failures** = number of past class failures  
+**Hypothesis**: Failing a subject could motivate the student to drink more, and the more subject they fail, the more alcohol they consumes.  
+                Alternatively, **failures** is also a proxy for success. The less failed subjects they had, the more subjects they did not fail. This might also caused alcohol consumption.  
+                
+**Note**:   The exploration also look at the possible effect of sex to alcohol consumption due to failing subjects.
 
 ```{r}
 library(ggplot2)
@@ -35,12 +47,17 @@ g1 <- ggplot(data, aes(x = high_use, y = failures, col = sex))
 g1 + geom_boxplot() + ylab("failures")
 ```
 
-
 ```{r}
 data %>% group_by(failures, sex, high_use) %>% summarise(count = n())
 ```
 
-Next, **absences** = number of school absences
+The result clearly shows male consumes high amount of alcohol when they have more failed subjects. However, almost no student consumes high amount of alcohol when they don't fail subjects.
+
+Next,  
+**absences** = number of school absences  
+**Hypothesis** = The number of absences might indicate more alcohol consumption.  
+
+**NOTE**: The exploration also includes the effect of sex in the relationship of high alcohol consumption and number of absences.
 
 ```{r}
 g2 <- ggplot(data, aes(x = high_use, y = absences, col = sex))
@@ -48,48 +65,69 @@ g2 <- ggplot(data, aes(x = high_use, y = absences, col = sex))
 # define the plot as a boxplot and draw it
 g2 + geom_boxplot() + ylab("absences")
 ```
-
+The resulting graph shows students with more absences have higher alcohol consumption, however difference between sexes is not apparent.
 
 ```{r}
 data %>% group_by(absences, sex, high_use) %>% summarise(count = n())
 ```
 
 
-Finally, **freetime** = free time after school.
+Finally, 
+**freetime** = free time after school.
+**Hypothesis**: The more free time the students have the more alcohol they consumes.
 
-
-
+*NOTE**: The effect of sex to the relationship of alcohol consumption and free time is also explored. 
 ```{r}
 g3 <- ggplot(data, aes(x = high_use, y = freetime, col = sex))
 
 # define the plot as a boxplot and draw it
 g3 + geom_boxplot() + ylab("freetime")
 ```
-
+The graph indicates some relationship between free time and alcohol consumption,and sex difference is only apparent for those who has no high alcohol consumption. 
 
 ```{r}
 data %>% group_by(freetime, sex, high_use) %>% summarise(count = n())
 ```
 
+Overall, we can further explore the relationship of **failures**, **absences**, **freetime** and **sex** by fitting a model. 
 
 ## Fitting a model
+
+For this exercise, we are going to use **glm()** function to fit a model to test relationship between high alcohol consumption and **failures**, **absences**, **freetime** and **sex**. The first model also includes interaction of sex with the first three explanatory variable.
 
 ```{r}
 ## fitting model using glm()
 m1 <- glm(high_use ~ failures*sex + absences*sex + freetime*sex, 
           data = data, family = "binomial")
 
-# print out a summary of the model
+#-- print out a summary of the model
 summary(m1)
-drop1(m1)
 
-# print out the coefficients of the model
+```
+Based on this model, there is no significant linear relationship between **failure-sex** and high alcohol consumption. Furthermore, **freetime-sex** has very low significant effect to high alcohol consumption.  
+Lets do some model selection using **drop1**.
+
+```{r}
+#-- Model selection
+drop1(m1)
+```
+
+Based on **AIC** values, we can drop **failures-sex** to improve the predictive capacity of the model.
+
+Let us run the new model (**m2**)which does not have **failures-sex** as an explanatory variable.
+
+```{r}
+#-- print out the coefficients of the model
 m2<- glm(high_use ~ failures + absences*sex + freetime*sex, 
          data = data, family = "binomial")
 summary(m2)
+
+#-- model selection
 drop1(m2)
 ```
+Model **m2** have lower AIC value after **drop1()**. This is still the best model so far, with almost all explanatory variable having significant linear correlation with high alcohol consumption.  
 
+Let us stuck with this model and further explore the results.
 
 ```{r}
 # compute odds ratios (OR)
@@ -101,9 +139,9 @@ CI <- confint(m2) %>% exp
 # print out the odds ratios with their confidence intervals
 cbind(OR, CI)
 ```
+The **odd ratios** for each explanatory variables suggest strong positive correlation with high alcohol consumption. However, the **95% CI** for sex seems to be wide.  
 
-
-
+We can test the predictive capacity of the model using the results from model **m2**.
 
 ```{r}
 # print out the coefficients of the model
@@ -124,10 +162,10 @@ select(data, failures, absences, sex, high_use, probability, prediction) %>% tai
 
 # tabulate the target variable versus the predictions
 table(high_use = data$high_use, prediction = data$prediction)
+table(data$high_use)
 
 ```
-
-
+The model is good in predicting low alcohol consumption than high alcohol consumption. The model still needs improvement.
 
 ```{r}
 # initialize a plot of 'high_use' versus 'probability' in 'alc'
