@@ -6,9 +6,13 @@ The **Boston** data set from MASS package will be used for this exercise. The da
 
 The data was originally used in this [paper](https://www.sciencedirect.com/science/article/pii/0095069678900062). It contains information about housing in Boston, Massachusetts collected by U.S. Census Service.
 
+The data contains 506 rows and 14 variables. This data exploration will be focus more on the **crim** variable, which is the per capita per crime rate by town.
 
 ```{r}
+#' Load the required packages
 library(MASS)
+library(ggplot2)
+library(GGally)
 
 data("Boston")
 
@@ -23,11 +27,21 @@ colSums(is.na(Boston))
 #' check summaries of each variables
 summary(Boston)
 
-pairs(Boston)
+ggpairs(Boston[1:5])
 ```
+
+```{r}
+ggpairs(Boston[c(1,6:10)])
+```
+
+```{r}
+ggpairs(Boston[c(1,11:14)])
+```
+The correlation of **crim** to other variables are not generally high and even the correlations higher than 0.5 does not look linear. The distribution also varies for each variable. 
 
 ## Standardizing the data set
 
+To proceed with the analysis, the variables were standardized (mean = 0). Scaling is done  to prevents variables with large numbers from dominating the clustering of the observations. 
 
 
 ```{r}
@@ -44,6 +58,10 @@ class(scaled.B)
 ```
 
 ## Creating categorical variable **crime**
+
+A new categorical variable **crime** will be created by classifiying **crim** values to either **"low"**, **"med_low"**, **"med_high"**, and **"high"**.  
+
+Use the quantile based on **crim** as bins in creating categories for **crime**. This new variable will replace the **crim** variable in the succeeding analysis.
 
 ```{r}
 #' print summary of variable 'crim'
@@ -64,12 +82,11 @@ scaled.B <- dplyr::select(scaled.B, -crim) %>% data.frame(scaled.B, crime)
 colnames(scaled.B)
 head(scaled.B, 5)
 
-
 ```
 
 ## Creating **training** and **test** subset
 
-
+Subset the data set into **training** and **test** set. The **training** set is composed of 80 % of the total observations while the **test** set will contain the rest of the observations.
 ```{r}
 # number of rows in the Boston dataset 
 n <- nrow(scaled.B)
@@ -93,7 +110,13 @@ test <- dplyr::select(test, -crime)
 
 ```
 
+Contain observations from **crime** from the test to another file called **correct_classes**, then remove the **crime** variable from the test set.
+
 ## Fitting **linear discriminat analysis**
+
+Perform **linear discriminant analysis** to the train set using **crime** as the response variable and the remaining variables as the covariates.  
+
+Then, proceed in creating a biplot to visualize the results.
 
 ```{r}
 # linear discriminant analysis
@@ -123,6 +146,8 @@ lda.arrows(lda.fit, myscale = 1)
 
 
 ## Predict the classes
+
+We can create a new data set containing predicted value of **crime** based on the model created from the training set. We feed the test set to the model to predict **crime** values for each row. We can then compare the **correct_classes** we saved earlier and the predicted values from the model and see how correct prediction the model model made.
 ```{r}
 
 # save the correct classes from test data
@@ -140,6 +165,7 @@ table(correct = correct_classes, predicted = lda.pred$class)
 ```
 
 ## Clustering
+We can also used the model to creast clusters in the Boston data set and visualy inspect the clustering of each variable based on **crime**.
 
 ```{r}
 Boston.std<- scale(Boston) %>% as.data.frame()
@@ -161,6 +187,10 @@ km <-kmeans(Boston.std, centers = 3)
 
 # plot the Boston dataset with clusters
 pairs(Boston.std, col = km$cluster)
+#ggpairs(Boston.std[1:5], col = km$cluster)
+#ggpairs(Boston.std[6:10], col = km$cluster)
+#ggpairs(Boston.std[11:14], col = km$cluster)
+
 
 
 
