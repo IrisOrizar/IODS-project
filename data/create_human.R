@@ -86,4 +86,66 @@ data <- inner_join(hd, gii, by = "Country")
 dim(data)
 str(data)
 
+#'-- save the file
+#'
+write.csv(data, 'human.csv', row.names = FALSE)
+
 #'END of Data Wrangling
+#'
+#'Week 5 Data wrangling
+#'
+#' read the human data
+data <- read.csv('human.csv', header = TRUE, sep = ',')
+
+dim(data)
+str(data)
+head(data, 5)
+
+#' mutate GNI.C to numeric
+data <- data %>% mutate(
+  GNI.C = as.numeric(gsub(",",".", gsub("\\.", "", GNI.C)))
+)
+
+str(data)
+head(data, 5)
+
+#' Select the following columns:
+#' 'Country' 'GRSE' 'GRLFP' 'educ.Year' 'LE'
+#' 'GNI.C' 'MMratio' 'ABR' 'PRP'
+
+w.dat <- data %>% dplyr::select(c('Country', 'GRSE', 'GRLFP', 'educ.Year',
+                                  'LE', 'GNI.C', 'MMratio', 'ABR', 'PRP'))
+
+str(w.dat)
+dim(w.dat)
+colSums(is.na(w.dat))
+
+#' Removing rows with NAs
+complete.cases(w.dat)
+data.frame(w.dat[-1], comp = complete.cases(w.dat))
+human<-filter(w.dat, complete.cases(w.dat) == TRUE)
+
+colSums(is.na(human))
+dim(human)
+
+
+#' Remove observations which relate to regions instead of countries
+tail(human, 10)
+
+#' the last 7 rows are regions instead of countries
+last <- nrow(human) - 7
+
+#' remove rows for regions
+human <- human[1:last, ]
+
+#' use countries as rownames
+rownames(human) <- human$Country
+
+#' remove column Country
+human <- select(human, -Country)
+
+head(human, 5)
+dim(human)
+
+
+#####   END OF DATA WRANGLING FOR WEEK 5

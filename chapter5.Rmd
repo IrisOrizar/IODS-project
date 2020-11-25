@@ -1,0 +1,59 @@
+# Dimensionality Reduction
+
+## Data exploration
+
+The data for this exercise can be accessed via this [link](http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt)
+
+```{r}
+human <- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt", sep  =",", header = T)
+
+#' data:  195 x 19
+dim(human)
+
+#' data structure
+str(human)
+
+#' check column names
+colnames(human)
+```
+
+### Mutate Gross National Income (GNI) to numeric variable
+
+```{r}
+library(dplyr)
+
+human <- human %>% mutate(
+  GNI = as.numeric(gsub(",",".", gsub("\\.", "", GNI)))
+)
+
+str(human$GNI)
+class(human)
+head(data, 5)
+```
+
+```{r}
+#' Select the following columns:
+#' 'Country' 'Edu2.FM' 'Labo.FM' 'Edu.Exp'
+#' 'Life.Exp' 'GNI' 'Mat.Mor' 'Ado.Birth' 'Parli.F'
+
+w.human <- human %>% dplyr::select(c('Country', 'Edu2.FM', 'Labo.FM', 'Edu.Exp',
+                                  'Life.Exp', 'GNI', 'Mat.Mor', 'Ado.Birth',
+                                  'Parli.F'))
+
+str(w.human)
+dim(w.human)
+colSums(is.na(w.human))
+```
+
+
+
+```{r}
+#' Removing rows with NAs
+complete.cases(w.human)
+data.frame(w.human[-1], comp = complete.cases(w.human))
+dat<-filter(w.human, complete.cases(w.human) == TRUE)
+
+colSums(is.na(dat))
+dim(dat)
+```
+
