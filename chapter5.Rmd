@@ -4,56 +4,94 @@
 
 The data for this exercise can be accessed via this [link](http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt)
 
-```{r}
-human <- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt", sep  =",", header = T)
+The original data has been pre processed for this exercise.
 
-#' data:  195 x 19
+```{r}
+#' set wd
+
+setwd("~/IODS2020/IODS-project/data")
+
+human<-read.csv('human2.csv', header = TRUE, sep = ',')
+
 dim(human)
-
-#' data structure
 str(human)
-
-#' check column names
-colnames(human)
 ```
 
-### Mutate Gross National Income (GNI) to numeric variable
+
 
 ```{r}
+library(ggplot2)
+library(GGally)
+library(corrplot)
 library(dplyr)
+library(tidyr)
 
-human <- human %>% mutate(
-  GNI = as.numeric(gsub(",",".", gsub("\\.", "", GNI)))
-)
+ggpairs(human)
+summary(human)
 
-str(human$GNI)
-class(human)
-head(data, 5)
+cor(human) %>% corrplot()
 ```
 
+
+
+
 ```{r}
-#' Select the following columns:
-#' 'Country' 'Edu2.FM' 'Labo.FM' 'Edu.Exp'
-#' 'Life.Exp' 'GNI' 'Mat.Mor' 'Ado.Birth' 'Parli.F'
+#' non-standardized data
+pca_human <- prcomp(human)
 
-w.human <- human %>% dplyr::select(c('Country', 'Edu2.FM', 'Labo.FM', 'Edu.Exp',
-                                  'Life.Exp', 'GNI', 'Mat.Mor', 'Ado.Birth',
-                                  'Parli.F'))
 
-str(w.human)
-dim(w.human)
-colSums(is.na(w.human))
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human, choices = 1:2, cex = c(0.3,0.3), col = c("grey40", "deeppink2"))
+
 ```
 
 
 
 ```{r}
-#' Removing rows with NAs
-complete.cases(w.human)
-data.frame(w.human[-1], comp = complete.cases(w.human))
-dat<-filter(w.human, complete.cases(w.human) == TRUE)
+#' standard data
+human_std <- scale(human)
 
-colSums(is.na(dat))
-dim(dat)
+#' pca of data_std
+pca_stdHuman <- prcomp(human_std)
+
+#'bi-plot
+biplot(pca_stdHuman, choices = 1:2, cex = c(0.3,0.3), col = c("grey40", "deeppink2"))
+
+```
+
+
+```{r}
+#' Factominer
+library(FactoMineR)
+
+data(tea)
+dim(tea)
+str(tea)
+summary(tea)
+colSums(is.na(tea))
+
+# column names to keep in the dataset
+#keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+
+# select the 'keep_columns' to create a new dataset
+tea_time <- tea %>% dplyr::select(c("Tea", "How", "how", "sugar", "where", "lunch"))
+#colnames(tea_time)
+# look at the summaries and structure of the data
+summary(tea_time)
+str(tea_time)
+
+# visualize the dataset
+gather(tea_time) %>% ggplot(aes(value)) + geom_bar() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + 
+  facet_wrap("key", scales = "free") 
+
+# multiple correspondence analysis
+mca <- MCA(tea_time, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+plot(mca, invisible=c("ind"))
 ```
 
