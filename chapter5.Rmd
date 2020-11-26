@@ -43,7 +43,7 @@ cor(human) %>% corrplot()
 No significant linear correlation was observed in many pairings, however interesing correlation were observed among **Maternal Mortality (Mat.Mor)**, **Expected Years of Education (Edu.Exp)**, **Life Expectancy (Life.Exp)**, and **Birth rate of Adolescent (Ado.Birth)**. Maternal mortality decreases and Life expectancy increases when number of years of education increases. Furthermore, birth rate among adolescence decreases as they stay longer in school. 
 
 ```{r}
-sub.human<-human %>% select(c('Mat.Mor', 'Edu.Exp', 'Life.Exp', 'Ado.Birth'))
+sub.human<-human %>% dplyr::select(c('Mat.Mor', 'Edu.Exp', 'Life.Exp', 'Ado.Birth'))
 ggpairs(sub.human)
 
 #' Data summary
@@ -105,7 +105,7 @@ The **FactoMiner** package will be used on this exercise and the **tea** data se
 #' Factominer
 library(FactoMineR)
 
-?data(tea)
+data(tea)
 dim(tea)
 str(tea)
 ```
@@ -138,7 +138,7 @@ gather(tea_time) %>% ggplot(aes(value)) + geom_bar() +
   facet_wrap("key", scales = "free") 
 
 # multiple correspondence analysis
-mca <- MCA(tea_time, graph = TRUE)
+mca <- MCA(tea_time, graph = FALSE)
 
 # summary of the model
 summary(mca)
