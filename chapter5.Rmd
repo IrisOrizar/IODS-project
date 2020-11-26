@@ -2,37 +2,59 @@
 
 ## Data exploration
 
-The data for this exercise can be accessed via this [link](http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt)
+The data for this exercise can be accessed via this [link](http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt). This data is from United Nations Development Programme and you can read more about the data on this [page](http://hdr.undp.org/en/content/human-development-index-hdi).
 
-The original data has been pre processed for this exercise.
+However, the original data set has been modified for this analysis and can be accessed using this [link](http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human2.txt).
+
+The **human2.txt** has 8 columns and 155 rows and country names are assigned as the **row.names**.
 
 ```{r}
-#' set wd
-
-setwd("~/IODS2020/IODS-project/data")
-
-human<-read.csv('human2.csv', header = TRUE, sep = ',')
+#' access and explore the data
+url <- "http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human2.txt"
+ 
+human<-read.csv(url, header = TRUE, sep = ',')
 
 dim(human)
 str(human)
+colnames(human)
 ```
 
+## Graphical overview and summary
 
+The data distribution of each covariate varies but in general are unimodal.
 
-```{r}
+```{r message = FALSE}
+#' load the required packages
 library(ggplot2)
 library(GGally)
 library(corrplot)
 library(dplyr)
 library(tidyr)
 
-ggpairs(human)
-summary(human)
 
+#' Graphical overview of the data
+ggpairs(human)
+
+#' Correlation matrix
 cor(human) %>% corrplot()
+
 ```
 
+No significant linear correlation was observed in many pairings, however interesing correlation were observed among **Maternal Mortality (Mat.Mor)**, **Expected Years of Education (Edu.Exp)**, **Life Expectancy (Life.Exp)**, and **Birth rate of Adolescent (Ado.Birth)**. Maternal mortality decreases and Life expectancy increases when number of years of education increases. Furthermore, birth rate among adolescence decreases as they stay longer in school. 
 
+```{r}
+sub.human<-human %>% select(c('Mat.Mor', 'Edu.Exp', 'Life.Exp', 'Ado.Birth'))
+ggpairs(sub.human)
+
+#' Data summary
+summary(human)
+
+
+```
+
+## Principal Component Analysis (PCA)
+
+PCA can be used to determine which covariates contributes most to the variation. First, we do an experiment. We run PCA on unscaled **human** data set and create a biplot of the first two components.
 
 
 ```{r}
@@ -45,7 +67,9 @@ biplot(pca_human, choices = 1:2, cex = c(0.3,0.3), col = c("grey40", "deeppink2"
 
 ```
 
+The resulting biplot is highly influence by ***GNI**. This is because **GNI** values are very high (range from `r min(human$GNI)` to `r max(human$GNI)`) compared to the other covariates such as **Edu2.FM** (range: `r min(human$Edu2.FM)` - `r max(human$Edu2.FM)`).  
 
+It is important to scale the data especially if they are from different measurements and units. Standardization ensure that covariates with high value influence the overall pattern.
 
 ```{r}
 #' standard data
@@ -57,19 +81,44 @@ pca_stdHuman <- prcomp(human_std)
 #'bi-plot
 biplot(pca_stdHuman, choices = 1:2, cex = c(0.3,0.3), col = c("grey40", "deeppink2"))
 
+summary(pca_stdHuman)
+
+
 ```
+
+The first two PCs can explain ~ 70 % of the total variation among the countries based on the PCA on standardized **Human** data set.
+
+```{r}
+pca_stdHuman
+```
+Furthermore, **Maternal mortality** is pulling the spread towards the positive end of the first component while **Life Expectancy** pulls towars the opposite end. We already established the negative linear correlation between these two covariates from the previous section. On the other hand, the ratio of Female to Male in the labor force and the number of females in the parliament positively influence the distribution at the second PC.
+
+
+## Multiple Correspondence Analysis (MCA)
+
+MCA is a technique for nominal categorical data for dimension reduction similar to PCA.
+
+The **FactoMiner** package will be used on this exercise and the **tea** data set can also be accessed through this package. 
 
 
 ```{r}
 #' Factominer
 library(FactoMineR)
 
-data(tea)
+?data(tea)
 dim(tea)
 str(tea)
+```
+This data is from a survey of 300 individuals about how they drink their tea, their perception about tea product and some personal details.
+
+```{r}
+colnames(tea)
 summary(tea)
 colSums(is.na(tea))
+```
+Only 6 categories was selected and included in the MCA. These are **Tea**, **How**, **how**, **sugar**, **where** and **lunch**.
 
+```{r}
 # column names to keep in the dataset
 #keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
 
@@ -79,17 +128,29 @@ tea_time <- tea %>% dplyr::select(c("Tea", "How", "how", "sugar", "where", "lunc
 # look at the summaries and structure of the data
 summary(tea_time)
 str(tea_time)
+```
 
+
+```{r}
 # visualize the dataset
 gather(tea_time) %>% ggplot(aes(value)) + geom_bar() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + 
   facet_wrap("key", scales = "free") 
 
 # multiple correspondence analysis
-mca <- MCA(tea_time, graph = FALSE)
+mca <- MCA(tea_time, graph = TRUE)
 
 # summary of the model
 summary(mca)
+
+#
+mca
+
+# variance explained of each dimension
+mca$eig
+
+#
+mca$var$contrib
 
 # visualize MCA
 plot(mca, invisible=c("ind"))

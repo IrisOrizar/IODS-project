@@ -1,9 +1,14 @@
 #' Author: Iris Orizar
 #' Date:Nov 17 2020
+#' Modified: Nov 26 2020
 #' Data source:  http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human_development.csv
 #'               http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/gender_inequality.csv
-#'               
-
+#' 
+###############################################################################              
+#'                                            
+#' NOTE:  Data wrangling for WEEK 5 starts at line 95
+#' 
+#' 
 #' load packages
 
 library(dplyr)
@@ -91,7 +96,8 @@ str(data)
 write.csv(data, 'human.csv', row.names = FALSE)
 
 #'END of Data Wrangling
-#'
+###############################################################################
+###############################################################################
 #'Week 5 Data wrangling
 #'
 #' read the human data
@@ -147,5 +153,6 @@ human <- select(human, -Country)
 head(human, 5)
 dim(human)
 
+write.csv(human, 'human2.csv', row.names = FALSE)
 
 #####   END OF DATA WRANGLING FOR WEEK 5
