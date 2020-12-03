@@ -1,0 +1,213 @@
+# Analysis of Longitudinal Data
+
+## Chapter 8: Graphical Displays and summary measure approach
+
+### The data
+
+The data set that will be used is from a nutrition study in three groups of rats (Crowder and Hand 1990). The weight of each rat was measured repeatedly 11 times every 7 weeks. The main objective is to determine if the different diets have effect on rats growth measured as weight.
+
+The **rats** data set can be access using this [link](https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt). The data set have 16 observations and 13 columns. It has a wide format wherein each column contains one repeated measurement for the same rat.
+
+```{r}
+RATS<-read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt",
+                 sep = "", header = TRUE)
+
+dim(RATS); str(RATS); summary(RATS)
+```
+
+Notice after loading the data set, R did not recognized the first two columns (**$ID** and **$Group**) as categorical variables. It has to be manually changed into categorical variables (**as.factor**). Furthermore, the data has to be converted into a long format by collapsing the repeated measurements into one column **weight**.
+
+```{r message = FALSE}
+library(dplyr)
+library(tidyr)
+
+lRATS <- RATS %>%
+  mutate(
+    fID = as.factor(ID),                        # create a new column $fID, which contains categorical variable
+    fGroup = as.factor(Group)                   # create a new column $fGroup which contains categorical variable 
+  ) %>% 
+  dplyr::select(c(-ID, -Group)) %>%                          # Remove the columns ID and Group
+  gather(key = time, value = weight, -fID, -fGroup) %>%      # Reformat the data set from wide to long
+  dplyr::mutate(week = as.integer(substr(time, 3,4)))        # create a new column $week which contains the numerical part of the column $time
+
+#' lRATS <- long format of RATS data set
+str(lRATS)
+
+```
+
+### Graphical overview
+
+
+
+```{r message = FALSE}
+library(ggplot2)
+
+p1 <- ggplot(lRATS, aes(x = week, y = weight)) + geom_line(aes(color = fGroup))
+p1 <- p1 + facet_wrap( ~ fID, scale = 'free')
+p1 <- p1 + labs(color = 'Group', caption = 'Fig 1. Individual rat weight measurements over  time.')
+p1 <- p1 + theme(plot.caption = element_text(hjust = 0, size = 14))
+                 
+p1
+
+```
+
+
+
+```{r}
+#' Boxplot
+p2 <- ggplot(lRATS, aes(x = week, y = weight, group = week)) + geom_boxplot(aes(color = fGroup))
+p2 <- p2 + labs(color = 'Diet', caption = 'Fig 2. Boxplot for the RATS data. Each panel is for every diet treatment')
+p2 <- p2 + facet_grid( fGroup ~ ., scale = 'free') 
+p2 <- p2 + theme(plot.caption = element_text(hjust = 0, size = 14))
+p2
+                 
+```
+
+
+```{r message = FALSE}
+#' Summary
+library(Rmisc)
+aveRats <- summarySE(data = lRATS, measurevar = 'weight', groupvars = c('week', 'fGroup'))
+
+p3 <- ggplot(aveRats, aes(x = week, y = weight)) + geom_point(aes(shape = fGroup))
+p3 <- p3 + geom_ribbon(aes(ymin = weight - ci, ymax = weight + ci), fill = "grey70", alpha = 0.5) + geom_line(aes(color = fGroup))
+p3 <- p3 + geom_errorbar(aes(ymin = weight - se, ymax = weight + se))
+p3 <- p3 + theme(legend.position = 'none',
+                 plot.caption = element_text(hjust = 0, size = 14)) +
+  labs(caption = 'Fig 3. Average weight per week for each diet treatment with confidence interval. error bars = Standard Error')
+p3 <- p3 + facet_wrap(fGroup ~ ., scale = 'free')
+p3
+```
+
+
+
+```{r}
+#' average weight over week 0 - 64
+p4 <- ggplot(lRATS, aes(x = fGroup, y = weight, group = fGroup)) + geom_boxplot(aes(color = fGroup))
+p4 <- p4 + labs(x = 'Group', y = 'weight (week 0 -64)', caption = 'Fig 4. Average weight for each treatment over 64 weeks')
+p4 <- p4 + theme(axis.title = element_text(size = 14),
+                 legend.position = 'none', plot.caption = element_text(hjust = 0, size = 14))
+p4
+```
+
+
+```{r message = FALSE}
+library(pander)
+#' anova
+fit1 <- aov(weight ~ fGroup, data = lRATS)
+pander(summary(fit1))
+
+#' linear model
+fit2 <- lm(weight ~ fGroup, data = lRATS)
+pander(summary(fit2))
+
+pander(anova(fit2))
+```
+
+## Chapter 9: Linear mixed effects models
+
+### The data
+
+The **BPRS** data will be used on this exercise (Davis 2002). The data set contains information about 40 males randomly assigned to one of the two treatments. Initial psychiatric rating scale (BPRS) was measured before the treatment (Week 0), and measured thereafter at weekly interval for 8 weeks. The scale is used to evaluate if a person has schizophrenia.
+
+```{r message = FALSE}
+#' upload data
+BPRS<-read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt",
+                 sep = "", header = TRUE)
+
+#' explore data
+dim(BPRS); str(BPRS); summary(BPRS)
+head(BPRS)
+
+#' scatterplot
+#BPRS$subject<-as.factor(BPRS$subject)
+library(GGally)
+ggpairs(BPRS[,3:11], ggplot2::aes(color = as.factor(BPRS$treatment)))
+
+```
+
+## Converting wide to long data
+
+```{r message = FALSE}
+library(dplyr)
+library(tidyr)
+lBPRS <- BPRS %>%
+  mutate(
+    ftreatment = as.factor(treatment),
+    fsubject = as.factor(subject)
+  ) %>% 
+  dplyr::select(c(-treatment, -subject)) %>%
+  gather(key = weeks, value = bprs, -ftreatment, -fsubject) %>%
+  dplyr::mutate(week = as.integer(substr(weeks, 5,5)))
+
+#' explore data
+head(lBPRS, 5)
+str(lBPRS)
+lBPRS$ID <- rep(1:40, 9) %>% as.factor()
+
+#' Graphical overview
+p1 <- ggplot(lBPRS, aes(x = week, y = bprs, group = ID)) + geom_line(aes(color = ftreatment))
+p1 <- p1 + labs(color = 'Treatment', caption = 'Fig 1. Individual BPRS profile by treatment group')
+p1 <- p1 + theme(plot.caption = element_text(hjust = 0, size = 14)) +
+  facet_wrap(~ ftreatment, scale = 'free') 
+p1
+
+```
+
+
+## Linear regression model
+
+```{r message = FALSE}
+#'linear model
+library(lme4)
+library(sjmisc)
+library(sjPlot)
+library(pander)
+fit1 <- lm(bprs ~ week + ftreatment, data = lBPRS)
+pander(summary(fit1))
+
+#' subject as random effect
+fit2 <- lmer(bprs ~ week + ftreatment + (1 | ID), data = lBPRS, REML = FALSE)
+
+
+fit3 <- lmer(bprs ~ week + ftreatment + (week | ID), data = lBPRS, REML = FALSE)
+
+
+fit4 <- lmer(bprs ~ week * ftreatment + (week | ID), data = lBPRS, REML = FALSE)
+tab_model(fit2, fit3, fit4,
+          dv.labels = c('Random Intercept', 'Random Intercept & Slope', 'Randrom Intercept & Slope + Interaction'))
+
+pander(anova(fit2, fit3, fit4))
+
+```
+
+## Predict
+
+```{r}
+lBPRS$pred <- predict(fit3, type = 'response') %>% as.integer()
+str(lBPRS)
+
+llBPRS <- lBPRS %>% gather(key = type, value = bprs, -ftreatment, -fsubject, -weeks, -week, -ID)
+
+llBPRS <- llBPRS %>% mutate(
+  type = as.factor(type),
+  week = as.factor(week),
+  ID = as.factor(ID)
+)
+str(llBPRS)
+
+p2a <- ggplot(subset(llBPRS, ftreatment == '1'), aes(x = week, y = bprs, group = ID)) + geom_line(aes(color = type))
+p2a <- p2a + labs(caption = 'Fig 2a. Observed vs Predicted BPRS points for treatment 1') +
+  facet_grid( type ~ fsubject) +
+  theme(plot.caption = element_text(hjust = 0, size = 14))
+p2a
+
+p2b <- ggplot(subset(llBPRS, ftreatment == '2'), aes(x = week, y = bprs, group = ID)) + geom_line(aes(color = type))
+p2b <- p2b + labs(caption = 'Fig 2b. Observed vs Predicted BPRS points for treatment 2') +
+  facet_grid( type ~ fsubject) +
+  theme(plot.caption = element_text(hjust = 0, size = 14))
+p2b
+
+
+```
+
