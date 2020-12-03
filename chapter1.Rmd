@@ -1,10 +1,7 @@
 
 # About the project
 
-<<<<<<< HEAD
-*I am still struggling using Git and experiencing issues using my work computer.  I have issues with 'knit', specially with xfun and tinytex.  Update: Its seems everything is in order now.   [Github](https://github.com/IrisOrizar/IODS-project)*
->>>>>>> 054f3b4289d62f8e5cfd686e30c776023601134e
->>>>>>> a9e8fc1462ac04531dcb9e57aabb1d7753ff8cd8
+This is the **Open Data Science** course. I am particularly interested in learning how to use **GitHUB** and get familiarize with **R Markdown**. Hopefully, the learning curve will not be too steep for me to follow.
 
 ```{r}
 # This is a so-called "R chunk" where you can write R code.

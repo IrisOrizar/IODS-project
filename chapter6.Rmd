@@ -2,7 +2,7 @@
 
 ## Chapter 8: Graphical Displays and summary measure approach
 
-### The data
+### The data=
 
 The data set that will be used is from a nutrition study in three groups of rats (Crowder and Hand 1990). The weight of each rat was measured repeatedly 11 times every 7 weeks. The main objective is to determine if the different diets have effect on rats growth measured as weight.
 
@@ -37,6 +37,7 @@ str(lRATS)
 
 ### Graphical overview
 
+We can further explore the data by creating plots to discover patterns. The first plot shows the weight of each rats overtime. The plot shows that there is uneven number of rats on each diet treatment. Furthermore, the initial weight of the rats vary across treatment. Overall, all the rats gained weight regardless of what type of diet they received. 
 
 
 ```{r message = FALSE}
@@ -44,13 +45,13 @@ library(ggplot2)
 
 p1 <- ggplot(lRATS, aes(x = week, y = weight)) + geom_line(aes(color = fGroup))
 p1 <- p1 + facet_wrap( ~ fID, scale = 'free')
-p1 <- p1 + labs(color = 'Group', caption = 'Fig 1. Individual rat weight measurements over  time.')
+p1 <- p1 + labs(color = 'Diet', caption = 'Fig 1. Individual rat weight measurements over  time.')
 p1 <- p1 + theme(plot.caption = element_text(hjust = 0, size = 14))
                  
 p1
 
 ```
-
+The boxplot shows the average weight gained by the rats in Diet 2 is not as significant compared to the other two diets (**Fig 2**). Furthermore, extreme weight values are persistent in all treatment over time.
 
 
 ```{r}
@@ -62,7 +63,7 @@ p2 <- p2 + theme(plot.caption = element_text(hjust = 0, size = 14))
 p2
                  
 ```
-
+The difference in weight gained among the different diet is more pronounce in **Fig 3**. In addition, variation is high across treatment but weight gain is steeper in diet 1.
 
 ```{r message = FALSE}
 #' Summary
@@ -78,37 +79,43 @@ p3 <- p3 + theme(legend.position = 'none',
 p3 <- p3 + facet_wrap(fGroup ~ ., scale = 'free')
 p3
 ```
-
+**Fig 4** shows boxplots of rat's average weight from week 1 - 64 for each treatment.Rats that receives diet 1 is smaller compared to the rats which received the other treatment. Furthermore, rat weight in diet 2 are skewed towards smaller rats. 
 
 
 ```{r}
 #' average weight over week 0 - 64
 p4 <- ggplot(lRATS, aes(x = fGroup, y = weight, group = fGroup)) + geom_boxplot(aes(color = fGroup))
-p4 <- p4 + labs(x = 'Group', y = 'weight (week 0 -64)', caption = 'Fig 4. Average weight for each treatment over 64 weeks')
+p4 <- p4 + labs(x = 'Diet', y = 'weight (week 1 -64)', caption = 'Fig 4. Average weight for each treatment over 64 weeks')
 p4 <- p4 + theme(axis.title = element_text(size = 14),
                  legend.position = 'none', plot.caption = element_text(hjust = 0, size = 14))
 p4
 ```
+### Fitting a model
 
-
+Analysis of variance suggests that the weight of the rats from each diet are significantly different. Post hoc test suggest the pairwise difference among the diet tretment are all significant as well.
 ```{r message = FALSE}
 library(pander)
 #' anova
 fit1 <- aov(weight ~ fGroup, data = lRATS)
 pander(summary(fit1))
+plot(TukeyHSD(fit1))
+```
+A linear model using weight as response and diet as fixed affect was fitted.The results supports the result from ANOVA that diet linearly affects the rat's weight (**R2 = 0.92**).Diet 3 seems to increase the weight of the rat the most. The **R2** ar 
 
+```{r message = FALSE}
 #' linear model
 fit2 <- lm(weight ~ fGroup, data = lRATS)
 pander(summary(fit2))
 
-pander(anova(fit2))
 ```
 
 ## Chapter 9: Linear mixed effects models
 
 ### The data
 
-The **BPRS** data will be used on this exercise (Davis 2002). The data set contains information about 40 males randomly assigned to one of the two treatments. Initial psychiatric rating scale (BPRS) was measured before the treatment (Week 0), and measured thereafter at weekly interval for 8 weeks. The scale is used to evaluate if a person has schizophrenia.
+The **BPRS** data will be used on this exercise (Davis 2002). The data set contains information about 40 males randomly assigned to one of the two treatments. Initial psychiatric rating scale (BPRS) was measured before the treatment (Week 0), and measured thereafter at weekly interval for 8 weeks. The scale is used to evaluate if a person has schizophrenia. 
+
+The scatterplots clearly shows the repeated measure nature of the BPRS scores for both treatment.
 
 ```{r message = FALSE}
 #' upload data
@@ -126,7 +133,9 @@ ggpairs(BPRS[,3:11], ggplot2::aes(color = as.factor(BPRS$treatment)))
 
 ```
 
-## Converting wide to long data
+### Converting wide to long data
+
+The data set is in wide format and needs to change to long format before further analyses.
 
 ```{r message = FALSE}
 library(dplyr)
@@ -144,7 +153,12 @@ lBPRS <- BPRS %>%
 head(lBPRS, 5)
 str(lBPRS)
 lBPRS$ID <- rep(1:40, 9) %>% as.factor()
+```
 
+### Graphical overview
+
+Plotting the bprs scores over time for each subject shows decreasing trend in most cases for both treatment.
+```{r message = FALSE}
 #' Graphical overview
 p1 <- ggplot(lBPRS, aes(x = week, y = bprs, group = ID)) + geom_line(aes(color = ftreatment))
 p1 <- p1 + labs(color = 'Treatment', caption = 'Fig 1. Individual BPRS profile by treatment group')
@@ -155,7 +169,9 @@ p1
 ```
 
 
-## Linear regression model
+### Linear regression model
+
+Different models were tested to predict bprs scores. By comparing the AIC scores of the three models, the best model was found to be with random intercept and random slope without interaction between the fixed variables. Furthermore, the treatment did not result to significant difference in bprs scores.
 
 ```{r message = FALSE}
 #'linear model
@@ -183,9 +199,14 @@ pander(anova(fit2, fit3, fit4))
 
 ## Predict
 
+BPRS scores can be predicted using the selected model. The results from **t.test** between the predicted value to the actual bprs scores suggest the model can fairly predict BPRS scores (**Fig 2a and 2b**).
+
+
 ```{r}
 lBPRS$pred <- predict(fit3, type = 'response') %>% as.integer()
 str(lBPRS)
+
+t.test(lBPRS$pred, lBPRS$bprs)
 
 llBPRS <- lBPRS %>% gather(key = type, value = bprs, -ftreatment, -fsubject, -weeks, -week, -ID)
 
