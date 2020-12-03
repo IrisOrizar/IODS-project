@@ -461,7 +461,7 @@ dim(RATS); str(RATS); summary(RATS)</code></pre>
 ##  Mean   :388.3   Mean   :394.6   Mean   :398.6   Mean   :404.1  
 ##  3rd Qu.:510.5   3rd Qu.:516.0   3rd Qu.:524.5   3rd Qu.:530.8  
 ##  Max.   :595.0   Max.   :612.0   Max.   :618.0   Max.   :628.0</code></pre>
-<p>Notice after loading the data set, R did not recognized the first two columns (<strong><span class="math inline">\(ID** and **\)</span>Group</strong>) as categorical variables. It has to be manually changed into categorical variables (<strong>as.factor</strong>). Furthermore, the data has to be converted into a long format by collapsing the repeated measurements into one column <strong>weight</strong>.</p>
+<p>Notice after loading the data set, R did not recognized the first two columns (<strong>ID</strong> and <strong>Group</strong>) as categorical variables. It has to be manually changed into categorical variables (<strong>as.factor</strong>). Furthermore, the data has to be converted into a long format by collapsing the repeated measurements into one column <strong>weight</strong>.</p>
 <pre class="r"><code>library(dplyr)
 library(tidyr)
 

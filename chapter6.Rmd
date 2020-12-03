@@ -15,7 +15,7 @@ RATS<-read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/
 dim(RATS); str(RATS); summary(RATS)
 ```
 
-Notice after loading the data set, R did not recognized the first two columns (**$ID** and **$Group**) as categorical variables. It has to be manually changed into categorical variables (**as.factor**). Furthermore, the data has to be converted into a long format by collapsing the repeated measurements into one column **weight**.
+Notice after loading the data set, R did not recognized the first two columns (**ID** and **Group**) as categorical variables. It has to be manually changed into categorical variables (**as.factor**). Furthermore, the data has to be converted into a long format by collapsing the repeated measurements into one column **weight**.
 
 ```{r message = FALSE}
 library(dplyr)
@@ -37,9 +37,7 @@ str(lRATS)
 
 ### Graphical overview
 
-We can further explore the data by creating plots to discover patterns. The first plot shows the weight of each rats overtime. The plot shows that there is uneven number of rats on each diet treatment. Furthermore, the initial weight of the rats vary across treatment. Overall, all the rats gained weight regardless of what type of diet they received. 
-
-
+We can further explore the data by creating plots to discover patterns. The first plot shows the weight of each rats overtime. The plot shows that there is uneven number of rats on each diet treatment. Furthermore, the initial weight of the rats vary across treatment. Overall, all the rats gained weight regardless of what type of diet they received.   
 ```{r message = FALSE}
 library(ggplot2)
 
@@ -66,7 +64,7 @@ p2
                  
 ```
 
-
+  
 The difference in weight gained among the different diet is more pronounce in **Fig 3**. In addition, variation is high across treatment but weight gain is steeper in diet 1.
 
 ```{r message = FALSE}
@@ -84,7 +82,7 @@ p3 <- p3 + facet_wrap(fGroup ~ ., scale = 'free')
 p3
 ```
 
-
+  
 **Fig 4** shows boxplots of rat's average weight from week 1 - 64 for each treatment.Rats that receives diet 1 is smaller compared to the rats which received the other treatment. Furthermore, rat weight in diet 2 are skewed towards smaller rats. 
 
 
@@ -97,7 +95,7 @@ p4 <- p4 + theme(axis.title = element_text(size = 14),
 p4
 ```
 
-
+  
 ### Fitting a model
 
 Analysis of variance suggests that the weight of the rats from each diet are significantly different. Post hoc test suggest the pairwise difference among the diet tretment are all significant as well.
@@ -109,7 +107,7 @@ pander(summary(fit1))
 plot(TukeyHSD(fit1))
 ```
 
-
+  
 A linear model using weight as response and diet as fixed affect was fitted.The results supports the result from ANOVA that diet linearly affects the rat's weight (**R2 = 0.92**).Diet 3 seems to increase the weight of the rat the most. The **R2** ar 
 
 ```{r message = FALSE}
