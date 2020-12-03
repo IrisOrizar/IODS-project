@@ -51,6 +51,8 @@ p1 <- p1 + theme(plot.caption = element_text(hjust = 0, size = 14))
 p1
 
 ```
+
+
 The boxplot shows the average weight gained by the rats in Diet 2 is not as significant compared to the other two diets (**Fig 2**). Furthermore, extreme weight values are persistent in all treatment over time.
 
 
@@ -63,6 +65,8 @@ p2 <- p2 + theme(plot.caption = element_text(hjust = 0, size = 14))
 p2
                  
 ```
+
+
 The difference in weight gained among the different diet is more pronounce in **Fig 3**. In addition, variation is high across treatment but weight gain is steeper in diet 1.
 
 ```{r message = FALSE}
@@ -79,6 +83,8 @@ p3 <- p3 + theme(legend.position = 'none',
 p3 <- p3 + facet_wrap(fGroup ~ ., scale = 'free')
 p3
 ```
+
+
 **Fig 4** shows boxplots of rat's average weight from week 1 - 64 for each treatment.Rats that receives diet 1 is smaller compared to the rats which received the other treatment. Furthermore, rat weight in diet 2 are skewed towards smaller rats. 
 
 
@@ -90,6 +96,8 @@ p4 <- p4 + theme(axis.title = element_text(size = 14),
                  legend.position = 'none', plot.caption = element_text(hjust = 0, size = 14))
 p4
 ```
+
+
 ### Fitting a model
 
 Analysis of variance suggests that the weight of the rats from each diet are significantly different. Post hoc test suggest the pairwise difference among the diet tretment are all significant as well.
@@ -100,6 +108,8 @@ fit1 <- aov(weight ~ fGroup, data = lRATS)
 pander(summary(fit1))
 plot(TukeyHSD(fit1))
 ```
+
+
 A linear model using weight as response and diet as fixed affect was fitted.The results supports the result from ANOVA that diet linearly affects the rat's weight (**R2 = 0.92**).Diet 3 seems to increase the weight of the rat the most. The **R2** ar 
 
 ```{r message = FALSE}
